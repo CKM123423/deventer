@@ -9,14 +9,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/admin/posts")
 @RequiredArgsConstructor
 public class AdminPostController {
 
     private final AdminPostService adminPostService;
 
     // 공지글 생성
-    @PutMapping("/posts/{postId}/notice")
+    @PutMapping("/{postId}/notice")
     public ResponseEntity<PostResponseDto> createNoticePost(
             @RequestBody PostRequestDto postRequestDto,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -27,7 +27,7 @@ public class AdminPostController {
     }
 
     // 공지글 수정
-    @PutMapping("/posts/notice/{postId}")
+    @PutMapping("/{postId}")
     public ResponseEntity<PostResponseDto> updateNoticePost(
             @PathVariable Long postId,
             @RequestBody UpdatePostRequestDto updatePostRequestDto,
@@ -39,7 +39,7 @@ public class AdminPostController {
     }
 
     // 어드민 권한으로 게시물 삭제
-    @DeleteMapping("/posts/{postId}")
+    @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deleteAnyPost(
             @PathVariable Long postId,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -48,7 +48,7 @@ public class AdminPostController {
         return ResponseEntity.noContent().build();
     }
    //카테고리 이동
- @PutMapping("/posts/{postId}")
+   @PutMapping("/{postId}")
     public ResponseEntity<PostResponseDto> moveCategory(
          @PathVariable Long postId,
          @RequestBody MoveCategoryRequestDto moveCategoryRequestDto,
