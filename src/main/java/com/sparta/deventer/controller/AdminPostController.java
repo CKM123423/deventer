@@ -27,7 +27,7 @@ public class AdminPostController {
     }
 
     // 공지글 수정
-    @PutMapping("/{postId}")
+    @PutMapping("/notice/{postId}")
     public ResponseEntity<PostResponseDto> updateNoticePost(
             @PathVariable Long postId,
             @RequestBody UpdatePostRequestDto updatePostRequestDto,
