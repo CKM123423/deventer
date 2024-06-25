@@ -65,7 +65,6 @@ Content-Type: application/json
   "title": "{{title}}",
   "content": "{{content}}",
   "categoryTopic": "{{categoryTopic}}"
-
 }
 
 ###  단일 게시글 조회
@@ -92,7 +91,7 @@ Content-Type: application/json
 }
 
 ### 게시글 삭제
-DELETE http://localhost:8080/posts/{{post_id}}
+DELETE http://localhost:8080/posts/4
 Authorization: {{Authorization}}
 
 ### 어드민 유저 로그인 (로그인 요청시 억세스토큰, 리플레시토큰 자동 저장 후 다른곳에서 가져다 쓸수 있습니다)
@@ -109,7 +108,7 @@ Content-Type: application/json
     client.global.set("X-Refresh-Token", response.headers.valueOf("X-Refresh-Token"));
 %}
 ### 공지글 생성
-PUT http://localhost:8080/admin/posts/{{post_id}}/notice
+POST http://localhost:8080/admin/posts/notice
 Authorization: {{Authorization}}
 Content-Type: application/json
 
@@ -119,7 +118,7 @@ Content-Type: application/json
   "categoryTopic": "Web"
 }
 ###공지글 수정
-PUT http://localhost:8080/admin/posts/{{post_id}}
+PUT http://localhost:8080/admin/posts/notice/11
 Authorization: {{Authorization}}
 Content-Type: application/json
 
