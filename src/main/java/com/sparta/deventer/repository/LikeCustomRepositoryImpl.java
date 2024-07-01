@@ -1,9 +1,12 @@
 package com.sparta.deventer.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sparta.deventer.dto.CommentResponseDto;
 import com.sparta.deventer.dto.PostResponseDto;
+import com.sparta.deventer.entity.Comment;
 import com.sparta.deventer.entity.Like;
 import com.sparta.deventer.entity.Post;
+import com.sparta.deventer.entity.QComment;
 import com.sparta.deventer.entity.QLike;
 import com.sparta.deventer.entity.QPost;
 import com.sparta.deventer.enums.ContentEnumType;
@@ -50,7 +53,8 @@ public class LikeCustomRepositoryImpl implements LikeCustomRepository {
                 .select(qPost)
                 .from(qLike)
                 .join(qPost).on(qLike.contentId.eq(qPost.id))
-                .where(qLike.user.id.eq(userId))
+                .where(qLike.user.id.eq(userId)
+                        .and(qLike.contentType.eq(ContentEnumType.POST)))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(qPost.createdAt.desc())
@@ -59,17 +63,55 @@ public class LikeCustomRepositoryImpl implements LikeCustomRepository {
         Long totalCount = queryFactory
                 .select(qLike.count())
                 .from(qLike)
-                .where(qLike.user.id.eq(userId))
+                .where(qLike.user.id.eq(userId)
+                        .and(qLike.contentType.eq(ContentEnumType.POST)))
                 .fetchOne();
 
         if (totalCount == null) {
             totalCount = 0L;
         }
 
-        List<PostResponseDto> results = posts.stream()
+        List<PostResponseDto> responseDtoList = posts.stream()
                 .map(PostResponseDto::new)
                 .toList();
 
-        return new PageImpl<>(results, pageable, totalCount);
+        return new PageImpl<>(responseDtoList, pageable, totalCount);
     }
+
+    @Override
+    public Page<CommentResponseDto> findLikedCommentsByUserOrderByCreatedAtDesc(Long userId,
+            Pageable pageable) {
+        QLike qLike = QLike.like;
+        QComment qComment = QComment.comment;
+
+        List<Comment> comments = queryFactory
+                .select(qComment)
+                .from(qLike)
+                .join(qComment).on(qLike.contentId.eq(qComment.id))
+                .where(qLike.user.id.eq(userId)
+                        .and(qLike.contentType.eq(ContentEnumType.COMMENT)))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(qComment.createdAt.desc())
+                .fetch();
+
+        Long totalCount = queryFactory
+                .select(qLike.count())
+                .from(qLike)
+                .where(qLike.user.id.eq(userId)
+                        .and(qLike.contentType.eq(ContentEnumType.COMMENT)))
+                .fetchOne();
+
+        if (totalCount == null) {
+            totalCount = 0L;
+        }
+
+        List<CommentResponseDto> responseDtoList = comments.stream()
+                .map(CommentResponseDto::new)
+                .toList();
+
+        return new PageImpl<>(responseDtoList, pageable, totalCount);
+    }
+
+
 }

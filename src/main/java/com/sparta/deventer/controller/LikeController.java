@@ -1,5 +1,6 @@
 package com.sparta.deventer.controller;
 
+import com.sparta.deventer.dto.CommentResponseDto;
 import com.sparta.deventer.dto.LikeRequestDto;
 import com.sparta.deventer.dto.PostResponseDto;
 import com.sparta.deventer.security.UserDetailsImpl;
@@ -34,6 +35,13 @@ public class LikeController {
     public ResponseEntity<Page<PostResponseDto>> getLikedPostsByUser(@PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page) {
         Page<PostResponseDto> response = likeService.getLikedPostsByUser(userId, page);
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/users/{userId}/likes/comments")
+    public ResponseEntity<Page<CommentResponseDto>> getLikedCommentByUser(@PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page) {
+        Page<CommentResponseDto> response = likeService.getLikedCommentByUser(userId, page);
         return ResponseEntity.ok().body(response);
     }
 }

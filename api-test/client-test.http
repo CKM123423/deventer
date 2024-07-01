@@ -276,7 +276,7 @@ DELETE http://localhost:8080/comments/{{postId}}
 Authorization: {{Authorization}}
 
 
-### 좋아요 기능
+### 좋아요 기능 (post)
 POST http://localhost:8080/likes
 Authorization: {{Authorization}}
 Content-Type: application/json
@@ -286,8 +286,24 @@ Content-Type: application/json
   "contentType": "post"
 }
 
+### 좋아요 기능 (comment)
+POST http://localhost:8080/likes
+Authorization: {{Authorization}}
+Content-Type: application/json
+
+{
+  "contentId": 4,
+  "contentType": "comment"
+}
+
+
+
 ### 해당 유저가 좋아요를 누른 게시글 목록 조회
 GET http://localhost:8080/users/{{userId}}/likes/posts
+
+
+### 해당 유저가 좋아요를 누른 댓글 목록 조회
+GET http://localhost:8080/users/{{userId}}/likes/comments
 
 
 ### 스크랩 기능

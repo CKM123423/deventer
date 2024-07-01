@@ -1,5 +1,6 @@
 package com.sparta.deventer.service;
 
+import com.sparta.deventer.dto.CommentResponseDto;
 import com.sparta.deventer.dto.PostResponseDto;
 import com.sparta.deventer.entity.Comment;
 import com.sparta.deventer.entity.Like;
@@ -68,10 +69,17 @@ public class LikeService {
         return likeRepository.findLikedPostsByUserOrderByCreatedAtDesc(userId, pageable);
     }
 
+    @Transactional(readOnly = true)
+    public Page<CommentResponseDto> getLikedCommentByUser(Long userId, int page) {
+        Pageable pageable = PageRequest.of(page, 5);
+        return likeRepository.findLikedCommentsByUserOrderByCreatedAtDesc(userId, pageable);
+    }
+
     private Object validateAndGetContent(String contentType, Long contentId, Long userId) {
         if (contentType.equals(ContentEnumType.POST.getType())) {
             Post post = postRepository.findById(contentId)
                     .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.POST_NOT_FOUND));
+
             if (post.getUser().getId().equals(userId)) {
                 throw new MismatchStatusException(MismatchStatusEntity.SELF_USER);
             }
@@ -81,6 +89,7 @@ public class LikeService {
             Comment comment = commentRepository.findById(contentId)
                     .orElseThrow(
                             () -> new EntityNotFoundException(NotFoundEntity.COMMENT_NOT_FOUND));
+
             if (comment.getUser().getId().equals(userId)) {
                 throw new MismatchStatusException(MismatchStatusEntity.SELF_USER);
             }
