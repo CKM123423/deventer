@@ -74,4 +74,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handelInvalidUserException(InvalidUserException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
+
+    @ExceptionHandler(MismatchStatusException.class)
+    public ResponseEntity<Object> handelMismatchStatusException(MismatchStatusException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
 }

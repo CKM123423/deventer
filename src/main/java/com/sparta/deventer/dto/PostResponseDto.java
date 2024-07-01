@@ -24,5 +24,4 @@ public class PostResponseDto {
         this.createAt = post.getCreatedAt();
         this.updateAt = post.getUpdateAt();
     }
-
 }

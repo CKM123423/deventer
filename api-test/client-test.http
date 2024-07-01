@@ -282,9 +282,12 @@ Authorization: {{Authorization}}
 Content-Type: application/json
 
 {
-  "contentId": 1,
+  "contentId": 6,
   "contentType": "post"
 }
+
+### 해당 유저가 좋아요를 누른 게시글 목록 조회
+GET http://localhost:8080/users/{{userId}}/likes/posts
 
 
 ### 스크랩 기능

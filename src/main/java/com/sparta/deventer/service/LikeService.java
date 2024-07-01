@@ -1,10 +1,9 @@
 package com.sparta.deventer.service;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sparta.deventer.dto.PostResponseDto;
 import com.sparta.deventer.entity.Comment;
 import com.sparta.deventer.entity.Like;
 import com.sparta.deventer.entity.Post;
-import com.sparta.deventer.entity.QLike;
 import com.sparta.deventer.entity.User;
 import com.sparta.deventer.enums.ContentEnumType;
 import com.sparta.deventer.enums.MismatchStatusEntity;
@@ -15,6 +14,9 @@ import com.sparta.deventer.repository.CommentRepository;
 import com.sparta.deventer.repository.LikeRepository;
 import com.sparta.deventer.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,19 +27,13 @@ public class LikeService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final LikeRepository likeRepository;
-    private final JPAQueryFactory queryFactory;
 
     @Transactional
     public String likeComparison(String contentType, Long contentId, User user) {
 
         ContentEnumType type = ContentEnumType.getByType(contentType);
 
-        QLike qLike = QLike.like;
-        Like existingLike = queryFactory.selectFrom(qLike)
-                .where(qLike.contentId.eq(contentId)
-                        .and(qLike.contentType.eq(type))
-                        .and(qLike.user.id.eq(user.getId())))
-                .fetchOne();
+        Like existingLike = likeRepository.findLikeByContentAndUser(contentId, type, user.getId());
 
         if (existingLike == null) {
             Object content = validateAndGetContent(contentType, contentId, user.getId());
@@ -64,6 +60,12 @@ public class LikeService {
 
             return "좋아요가 취소 되었습니다.";
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PostResponseDto> getLikedPostsByUser(Long userId, int page) {
+        Pageable pageable = PageRequest.of(page, 5);
+        return likeRepository.findLikedPostsByUserOrderByCreatedAtDesc(userId, pageable);
     }
 
     private Object validateAndGetContent(String contentType, Long contentId, Long userId) {
