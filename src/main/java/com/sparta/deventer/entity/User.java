@@ -5,6 +5,8 @@ import com.sparta.deventer.enums.UserRole;
 import com.sparta.deventer.enums.UserStatus;
 import com.sparta.deventer.exception.AlreadyWithdrawnException;
 import com.sparta.deventer.exception.InvalidPasswordException;
+import com.sparta.deventer.exception.InvalidUserException;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,8 +14,11 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -64,6 +69,9 @@ public class User extends Timestamped {
 
     private LocalDateTime deletedAt;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
+
     public User(String username, String password, String nickname, UserRole role, String email,
             UserLoginType loginType) {
         this.username = username;
@@ -84,7 +92,7 @@ public class User extends Timestamped {
 
     public void validateId(Long id) {
         if (!id.equals(this.getId())) {
-            throw new IllegalArgumentException("자신의 정보만 수정할 수 있습니다.");
+            throw new InvalidUserException("자신의 정보만 수정할 수 있습니다.");
         }
     }
 

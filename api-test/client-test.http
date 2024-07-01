@@ -277,8 +277,14 @@ Authorization: {{Authorization}}
 
 
 ### 좋아요 기능
-POST http://localhost:8080/likes?contentType=post&contentId=3
-Authorization:{{Authorization}}
+POST http://localhost:8080/likes
+Authorization: {{Authorization}}
+Content-Type: application/json
+
+{
+  "contentId": 1,
+  "contentType": "post"
+}
 
 
 ### 스크랩 기능

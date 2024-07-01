@@ -1,12 +1,14 @@
 package com.sparta.deventer.controller;
 
+import com.sparta.deventer.dto.LikeRequestDto;
 import com.sparta.deventer.security.UserDetailsImpl;
 import com.sparta.deventer.service.LikeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -16,13 +18,10 @@ public class LikeController {
     private final LikeService likeService;
 
     @PostMapping("/likes")
-    public ResponseEntity<String> isLike(@AuthenticationPrincipal UserDetailsImpl userDetails
-            , @RequestParam("contentType") String contentType
-            , @RequestParam("contentId") Long contentId) {
-        Boolean isLiked = likeService.likeComparison(contentType, contentId,
-                userDetails.getUser());
-        String message = isLiked ? "좋아요가 완료 되었습니다." : "좋아요가 취소 되었습니다.";
-        return ResponseEntity.ok()
-                .body(message + "현재 좋아요 갯수 : " + likeService.likeCount(contentType, contentId));
+    public ResponseEntity<String> isLike(@RequestBody @Valid LikeRequestDto requestDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        String message = likeService.likeComparison(requestDto.getContentType(),
+                requestDto.getContentId(), userDetails.getUser());
+        return ResponseEntity.ok().body(message);
     }
 }

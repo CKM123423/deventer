@@ -1,10 +1,12 @@
 package com.sparta.deventer.service;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.deventer.entity.Comment;
-import com.sparta.deventer.entity.ContentEnumType;
 import com.sparta.deventer.entity.Like;
 import com.sparta.deventer.entity.Post;
+import com.sparta.deventer.entity.QLike;
 import com.sparta.deventer.entity.User;
+import com.sparta.deventer.enums.ContentEnumType;
 import com.sparta.deventer.enums.MismatchStatusEntity;
 import com.sparta.deventer.enums.NotFoundEntity;
 import com.sparta.deventer.exception.EntityNotFoundException;
@@ -12,9 +14,9 @@ import com.sparta.deventer.exception.MismatchStatusException;
 import com.sparta.deventer.repository.CommentRepository;
 import com.sparta.deventer.repository.LikeRepository;
 import com.sparta.deventer.repository.PostRepository;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,42 +25,66 @@ public class LikeService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final LikeRepository likeRepository;
+    private final JPAQueryFactory queryFactory;
 
-    public Boolean likeComparison(String contentType, Long contentId, User user) {
-        Optional<Like> like = likeRepository.findByContentIdAndContentTypeAndUserId(contentId,
-                ContentEnumType.getByType(contentType), user.getId());
+    @Transactional
+    public String likeComparison(String contentType, Long contentId, User user) {
 
-        if (like.isEmpty()) {
-            CheckContent(contentType, contentId, user.getId());
-            Like saveLike = new Like(user, contentId, contentType);
+        ContentEnumType type = ContentEnumType.getByType(contentType);
+
+        QLike qLike = QLike.like;
+        Like existingLike = queryFactory.selectFrom(qLike)
+                .where(qLike.contentId.eq(contentId)
+                        .and(qLike.contentType.eq(type))
+                        .and(qLike.user.id.eq(user.getId())))
+                .fetchOne();
+
+        if (existingLike == null) {
+            Object content = validateAndGetContent(contentType, contentId, user.getId());
+            Like saveLike = new Like(user, contentId, type);
             likeRepository.save(saveLike);
-            return true;
+
+            if (content instanceof Post) {
+                ((Post) content).likeCountUp();
+            } else if (content instanceof Comment) {
+                ((Comment) content).likeCountUp();
+            }
+
+            return "좋아요가 완료 되었습니다.";
         } else {
-            CheckContent(contentType, contentId, user.getId());
-            likeRepository.delete(like.get());
-            return false;
+            Object content = validateAndGetContent(contentType, contentId, user.getId());
+
+            if (content instanceof Post) {
+                ((Post) content).likeCountDown();
+            } else if (content instanceof Comment) {
+                ((Comment) content).likeCountDown();
+            }
+
+            likeRepository.delete(existingLike);
+
+            return "좋아요가 취소 되었습니다.";
         }
     }
 
-    public int likeCount(String contentType, Long contentId) {
-        return likeRepository.findByContentIdAndContentType(contentId,
-                ContentEnumType.getByType(contentType)).size();
-    }
-
-    public void CheckContent(String contentType, Long contentId, Long userId) {
+    private Object validateAndGetContent(String contentType, Long contentId, Long userId) {
         if (contentType.equals(ContentEnumType.POST.getType())) {
-            Post post = postRepository.findById(contentId).orElseThrow(
-                    () -> new EntityNotFoundException(NotFoundEntity.POST_NOT_FOUND));
+            Post post = postRepository.findById(contentId)
+                    .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.POST_NOT_FOUND));
             if (post.getUser().getId().equals(userId)) {
                 throw new MismatchStatusException(MismatchStatusEntity.SELF_USER);
             }
-        } else {
-            Comment comment = commentRepository.findById(contentId).orElseThrow(
-                    () -> new EntityNotFoundException(NotFoundEntity.COMMENT_NOT_FOUND));
+
+            return post;
+        } else if (contentType.equals(ContentEnumType.COMMENT.getType())) {
+            Comment comment = commentRepository.findById(contentId)
+                    .orElseThrow(
+                            () -> new EntityNotFoundException(NotFoundEntity.COMMENT_NOT_FOUND));
             if (comment.getUser().getId().equals(userId)) {
                 throw new MismatchStatusException(MismatchStatusEntity.SELF_USER);
             }
+
+            return comment;
         }
+        throw new IllegalArgumentException("지원하지 않는 타입입니다.");
     }
 }
-
