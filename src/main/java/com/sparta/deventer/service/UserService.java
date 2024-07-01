@@ -9,6 +9,7 @@ import com.sparta.deventer.entity.PasswordHistory;
 import com.sparta.deventer.entity.User;
 import com.sparta.deventer.enums.ContentEnumType;
 import com.sparta.deventer.exception.InvalidPasswordException;
+import com.sparta.deventer.exception.InvalidUserException;
 import com.sparta.deventer.repository.CommentRepository;
 import com.sparta.deventer.repository.LikeRepository;
 import com.sparta.deventer.repository.PasswordHistoryRepository;
@@ -33,7 +34,9 @@ public class UserService {
     private final LikeRepository likeRepository;
 
     public ProfileResponseDto getProfile(Long userId, User user) {
-        user.validateId(userId);
+        if (!user.checkUserId(userId)) {
+            throw new InvalidUserException("본인만 사용가능한 기능입니다.");
+        }
         long postsLikedCount = likeRepository.countLikedContentByUserId(userId,
                 ContentEnumType.POST);
         long commentsLikedCount = likeRepository.countLikedContentByUserId(userId,
@@ -46,19 +49,25 @@ public class UserService {
     }
 
     public Page<PostResponseDto> getAllPosts(Long userId, User user, Pageable pageable) {
-        user.validateId(userId);
+        if (!user.checkUserId(userId)) {
+            throw new InvalidUserException("본인만 사용가능한 기능입니다.");
+        }
         return postRepository.findByUserId(userId, pageable).map(PostResponseDto::new);
     }
 
     public Page<CommentResponseDto> getAllComments(Long userId, User user, Pageable pageable) {
-        user.validateId(userId);
+        if (!user.checkUserId(userId)) {
+            throw new InvalidUserException("본인만 사용가능한 기능입니다.");
+        }
         return commentRepository.findByUserId(userId, pageable).map(CommentResponseDto::new);
     }
 
     public ProfileResponseDto updateProfile(Long userId,
             UpdateProfileRequestDto updateProfileRequestDto, User user) {
 
-        user.validateId(userId);
+        if (!user.checkUserId(userId)) {
+            throw new InvalidUserException("본인만 사용가능한 기능입니다.");
+        }
 
         user.updateUserProfile(updateProfileRequestDto.getNickname(),
                 updateProfileRequestDto.getEmail());
@@ -72,7 +81,9 @@ public class UserService {
     public void changePassword(Long userId, ChangePasswordRequestDto changePasswordRequestDto,
             User user) {
 
-        user.validateId(userId);
+        if (!user.checkUserId(userId)) {
+            throw new InvalidUserException("본인만 사용가능한 기능입니다.");
+        }
 
         String currentPassword = changePasswordRequestDto.getCurrentPassword();
         String newPassword = changePasswordRequestDto.getNewPassword();

@@ -37,7 +37,7 @@ public class LikeService {
         Like existingLike = likeRepository.findLikeByContentAndUser(contentId, type, user.getId());
 
         if (existingLike == null) {
-            Object content = validateAndGetContent(contentType, contentId, user.getId());
+            Object content = validateAndGetContent(contentType, contentId, user);
             Like saveLike = new Like(user, contentId, type);
             likeRepository.save(saveLike);
 
@@ -49,7 +49,7 @@ public class LikeService {
 
             return "좋아요가 완료 되었습니다.";
         } else {
-            Object content = validateAndGetContent(contentType, contentId, user.getId());
+            Object content = validateAndGetContent(contentType, contentId, user);
 
             if (content instanceof Post) {
                 ((Post) content).likeCountDown();
@@ -75,12 +75,12 @@ public class LikeService {
         return likeRepository.findLikedCommentsByUserOrderByCreatedAtDesc(userId, pageable);
     }
 
-    private Object validateAndGetContent(String contentType, Long contentId, Long userId) {
+    private Object validateAndGetContent(String contentType, Long contentId, User user) {
         if (contentType.equals(ContentEnumType.POST.getType())) {
             Post post = postRepository.findById(contentId)
                     .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.POST_NOT_FOUND));
 
-            if (post.getUser().getId().equals(userId)) {
+            if (user.checkUserId(post.getUser().getId())) {
                 throw new MismatchStatusException(MismatchStatusEntity.SELF_USER);
             }
 
@@ -90,7 +90,7 @@ public class LikeService {
                     .orElseThrow(
                             () -> new EntityNotFoundException(NotFoundEntity.COMMENT_NOT_FOUND));
 
-            if (comment.getUser().getId().equals(userId)) {
+            if (user.checkUserId(comment.getUser().getId())) {
                 throw new MismatchStatusException(MismatchStatusEntity.SELF_USER);
             }
 

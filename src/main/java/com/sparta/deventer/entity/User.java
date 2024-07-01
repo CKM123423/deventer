@@ -5,7 +5,6 @@ import com.sparta.deventer.enums.UserRole;
 import com.sparta.deventer.enums.UserStatus;
 import com.sparta.deventer.exception.AlreadyWithdrawnException;
 import com.sparta.deventer.exception.InvalidPasswordException;
-import com.sparta.deventer.exception.InvalidUserException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,6 +18,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -112,10 +112,7 @@ public class User extends Timestamped {
         }
     }
 
-    public void validateId(Long id) {
-        if (!id.equals(this.getId())) {
-            throw new InvalidUserException("자신의 정보만 수정할 수 있습니다.");
-        }
+    public boolean checkUserId(Long id) {
+        return Objects.equals(this.id, id);
     }
-
 }
