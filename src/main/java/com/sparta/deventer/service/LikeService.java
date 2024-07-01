@@ -65,13 +65,13 @@ public class LikeService {
 
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getLikedPostsByUser(Long userId, int page) {
-        Pageable pageable = PageRequest.of(page, 5);
+        Pageable pageable = PageRequest.of(page - 1, 5);
         return likeRepository.findLikedPostsByUserOrderByCreatedAtDesc(userId, pageable);
     }
 
     @Transactional(readOnly = true)
     public Page<CommentResponseDto> getLikedCommentByUser(Long userId, int page) {
-        Pageable pageable = PageRequest.of(page, 5);
+        Pageable pageable = PageRequest.of(page - 1, 5);
         return likeRepository.findLikedCommentsByUserOrderByCreatedAtDesc(userId, pageable);
     }
 
