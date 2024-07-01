@@ -15,4 +15,6 @@ public interface LikeCustomRepository {
 
     Page<CommentResponseDto> findLikedCommentsByUserOrderByCreatedAtDesc(Long userId,
             Pageable pageable);
+
+    long countLikedContentByUserId(Long userId, ContentEnumType contentType);
 }

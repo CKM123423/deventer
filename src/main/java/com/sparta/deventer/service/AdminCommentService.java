@@ -52,9 +52,7 @@ public class AdminCommentService {
     }
 
     public Comment emptyCheckComment(Long commentId) {
-        return commentRepository.findById(commentId).orElseThrow(
-                () -> new IllegalArgumentException("댓글이 존재 하지 않습니다."));
+        return commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("댓글이 존재 하지 않습니다."));
     }
-
-
 }

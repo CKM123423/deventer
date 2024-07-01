@@ -11,6 +11,7 @@ import com.sparta.deventer.entity.QLike;
 import com.sparta.deventer.entity.QPost;
 import com.sparta.deventer.enums.ContentEnumType;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,14 +36,6 @@ public class LikeCustomRepositoryImpl implements LikeCustomRepository {
                 .fetchOne();
     }
 
-    /*
-     * SELECT p.*
-     * FROM likes l
-     * JOIN posts p ON l.content_id = p.id
-     * WHERE l.user_id = ?
-     * ORDER BY p.created_at DESC
-     * LIMIT ? OFFSET ?
-     */
     @Override
     public Page<PostResponseDto> findLikedPostsByUserOrderByCreatedAtDesc(Long userId,
             Pageable pageable) {
@@ -60,16 +53,7 @@ public class LikeCustomRepositoryImpl implements LikeCustomRepository {
                 .orderBy(qPost.createdAt.desc())
                 .fetch();
 
-        Long totalCount = queryFactory
-                .select(qLike.count())
-                .from(qLike)
-                .where(qLike.user.id.eq(userId)
-                        .and(qLike.contentType.eq(ContentEnumType.POST)))
-                .fetchOne();
-
-        if (totalCount == null) {
-            totalCount = 0L;
-        }
+        long totalCount = countLikedContentByUserId(userId, ContentEnumType.POST);
 
         List<PostResponseDto> responseDtoList = posts.stream()
                 .map(PostResponseDto::new)
@@ -95,16 +79,7 @@ public class LikeCustomRepositoryImpl implements LikeCustomRepository {
                 .orderBy(qComment.createdAt.desc())
                 .fetch();
 
-        Long totalCount = queryFactory
-                .select(qLike.count())
-                .from(qLike)
-                .where(qLike.user.id.eq(userId)
-                        .and(qLike.contentType.eq(ContentEnumType.COMMENT)))
-                .fetchOne();
-
-        if (totalCount == null) {
-            totalCount = 0L;
-        }
+        long totalCount = countLikedContentByUserId(userId, ContentEnumType.COMMENT);
 
         List<CommentResponseDto> responseDtoList = comments.stream()
                 .map(CommentResponseDto::new)
@@ -113,5 +88,15 @@ public class LikeCustomRepositoryImpl implements LikeCustomRepository {
         return new PageImpl<>(responseDtoList, pageable, totalCount);
     }
 
+    @Override
+    public long countLikedContentByUserId(Long userId, ContentEnumType contentType) {
+        QLike qLike = QLike.like;
 
+        return Optional.ofNullable(queryFactory
+                .select(qLike.count())
+                .from(qLike)
+                .where(qLike.user.id.eq(userId)
+                        .and(qLike.contentType.eq(contentType)))
+                .fetchOne()).orElse(0L);
+    }
 }

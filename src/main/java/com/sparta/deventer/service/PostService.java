@@ -32,13 +32,11 @@ public class PostService {
     private final CategoryRepository categoryRepository;
     private final CommentRepository commentRepository;
 
-  private void UserNotBlocked(User user) {
-    if (user.getStatus() == UserStatus.BLOCKED) {
-      throw new EntityNotFoundException(NotFoundEntity.USER_NOT_FOUND);
+    private void UserNotBlocked(User user) {
+        if (user.getStatus() == UserStatus.BLOCKED) {
+            throw new EntityNotFoundException(NotFoundEntity.USER_NOT_FOUND);
+        }
     }
-  }
-
-
 
     public PostWithCommentsResponseDto getPostDetail(Long postId) {
         List<Comment> commentList = commentRepository.findAllByPostId(postId);
@@ -60,7 +58,7 @@ public class PostService {
 
     // 게시물 생성
     public PostResponseDto createPost(PostRequestDto postRequestDto, User user) {
-      UserNotBlocked(user);
+        UserNotBlocked(user);
         Category category = categoryRepository.findByTopic(postRequestDto.getCategoryTopic())
                 .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.CATEGORY_NOT_FOUND));
 
@@ -103,7 +101,7 @@ public class PostService {
     // 게시글 수정
     public PostResponseDto updatePost(Long postId, UpdatePostRequestDto updatePostRequestsDto,
             User user) {
-      UserNotBlocked(user);
+        UserNotBlocked(user);
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.POST_NOT_FOUND));
@@ -122,7 +120,7 @@ public class PostService {
 
     //게시글 삭제
     public void deletePost(Long postId, User user) {
-      UserNotBlocked(user);
+        UserNotBlocked(user);
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.POST_NOT_FOUND));
 

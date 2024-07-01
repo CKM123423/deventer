@@ -39,7 +39,6 @@ public class User extends Timestamped {
     private String username;
 
     @Column(nullable = false)
-    @Setter
     private String password;
 
     @Column(nullable = false, unique = true)
@@ -55,7 +54,6 @@ public class User extends Timestamped {
     private String refreshToken;
 
     @Column(nullable = false, unique = true)
-    @Setter
     private String email;
 
     @Column(nullable = false)
@@ -84,16 +82,13 @@ public class User extends Timestamped {
         this.refreshToken = null;
     }
 
-    public void validatePassword(PasswordEncoder passwordEncoder, String password) {
-        if (!passwordEncoder.matches(password, this.password)) {
-            throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
-        }
+    public void updateUserProfile(String nickname, String email) {
+        this.nickname = nickname == null ? this.nickname : nickname;
+        this.email = email == null ? this.email : email;
     }
 
-    public void validateId(Long id) {
-        if (!id.equals(this.getId())) {
-            throw new InvalidUserException("자신의 정보만 수정할 수 있습니다.");
-        }
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
     }
 
     public void saveRefreshToken(String refreshToken) {
@@ -110,4 +105,17 @@ public class User extends Timestamped {
             throw new AlreadyWithdrawnException("이미 탈퇴한 사용자입니다.");
         }
     }
+
+    public void validatePassword(PasswordEncoder passwordEncoder, String password) {
+        if (!passwordEncoder.matches(password, this.password)) {
+            throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
+        }
+    }
+
+    public void validateId(Long id) {
+        if (!id.equals(this.getId())) {
+            throw new InvalidUserException("자신의 정보만 수정할 수 있습니다.");
+        }
+    }
+
 }
