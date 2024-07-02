@@ -75,6 +75,7 @@ public class PostService {
                 pageable.getPageSize(),
                 Sort.by("createdAt").descending()
         );
+
         Page<PostResponseDto> page = postRepository.findAll(sortedByCreatedAtDesc)
                 .map(PostResponseDto::new);
 
@@ -91,6 +92,7 @@ public class PostService {
                 pageable.getPageSize(),
                 Sort.by("createdAt").descending()
         );
+
         Page<PostResponseDto> page = postRepository.findAllByCategory(category,
                         sortedByCreatedAtDesc)
                 .map(PostResponseDto::new);

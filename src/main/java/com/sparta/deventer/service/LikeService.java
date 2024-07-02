@@ -14,8 +14,8 @@ import com.sparta.deventer.exception.MismatchStatusException;
 import com.sparta.deventer.repository.CommentRepository;
 import com.sparta.deventer.repository.LikeRepository;
 import com.sparta.deventer.repository.PostRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -64,15 +64,19 @@ public class LikeService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostResponseDto> getLikedPostsByUser(Long userId, int page) {
+    public List<PostResponseDto> getLikedPostsByUser(Long userId, int page) {
         Pageable pageable = PageRequest.of(page - 1, 5);
-        return likeRepository.findLikedPostsByUserOrderByCreatedAtDesc(userId, pageable);
+        return likeRepository.findLikedPostsByUserOrderByCreatedAtDesc(userId, pageable).stream()
+                .map(PostResponseDto::new)
+                .toList();
     }
 
     @Transactional(readOnly = true)
-    public Page<CommentResponseDto> getLikedCommentByUser(Long userId, int page) {
+    public List<CommentResponseDto> getLikedCommentByUser(Long userId, int page) {
         Pageable pageable = PageRequest.of(page - 1, 5);
-        return likeRepository.findLikedCommentsByUserOrderByCreatedAtDesc(userId, pageable);
+        return likeRepository.findLikedCommentsByUserOrderByCreatedAtDesc(userId, pageable).stream()
+                .map(CommentResponseDto::new)
+                .toList();
     }
 
     private Object validateAndGetContent(String contentType, Long contentId, User user) {
