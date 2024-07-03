@@ -2,9 +2,9 @@ package com.sparta.deventer.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.sparta.deventer.dto.CommentResponseDto;
 import com.sparta.deventer.dto.PostResponseDto;
@@ -51,12 +51,12 @@ class LikeServiceTest {
         // Given
         String contentType = "post";
         Long contentId = 1L;
-        Post post = new Post("Title", "Content", writerUser, null);
-        when(writerUser.getId()).thenReturn(1L);
-        when(testUser.getId()).thenReturn(2L);
-        when(likeCustomRepository.findLikeByContentAndUser(contentId, ContentEnumType.POST,
-                testUser.getId())).thenReturn(null);
-        when(postRepository.findById(contentId)).thenReturn(Optional.of(post));
+        Post post = new Post(null, null, writerUser, null);
+        given(writerUser.getId()).willReturn(1L);
+        given(testUser.getId()).willReturn(2L);
+        given(likeCustomRepository.findLikeByContentAndUser(contentId, ContentEnumType.POST,
+                testUser.getId())).willReturn(null);
+        given(postRepository.findById(contentId)).willReturn(Optional.of(post));
 
         // When
         String result = likeService.likeToggle(contentType, contentId, testUser);
@@ -72,13 +72,13 @@ class LikeServiceTest {
         // Given
         String contentType = "post";
         Long contentId = 1L;
-        Post post = new Post("Title", "Content", writerUser, null);
+        Post post = new Post(null, null, writerUser, null);
         Like like = new Like(testUser, contentId, ContentEnumType.POST);
-        when(writerUser.getId()).thenReturn(1L);
-        when(testUser.getId()).thenReturn(2L);
-        when(likeCustomRepository.findLikeByContentAndUser(contentId, ContentEnumType.POST,
-                testUser.getId())).thenReturn(like);
-        when(postRepository.findById(contentId)).thenReturn(Optional.of(post));
+        given(writerUser.getId()).willReturn(1L);
+        given(testUser.getId()).willReturn(2L);
+        given(likeCustomRepository.findLikeByContentAndUser(contentId, ContentEnumType.POST,
+                testUser.getId())).willReturn(like);
+        given(postRepository.findById(contentId)).willReturn(Optional.of(post));
 
         // When
         String result = likeService.likeToggle(contentType, contentId, testUser);
@@ -94,8 +94,8 @@ class LikeServiceTest {
         // Given
         Long userId = testUser.getId();
         Pageable pageable = PageRequest.of(0, 5);
-        when(likeCustomRepository.findLikedPostsByUserOrderByCreatedAtDesc(userId, pageable))
-                .thenReturn(List.of(new PostResponseDto()));
+        given(likeCustomRepository.findLikedPostsByUserOrderByCreatedAtDesc(userId, pageable))
+                .willReturn(List.of(new PostResponseDto()));
 
         // When
         List<PostResponseDto> result = likeService.getLikedPostsByUser(userId, 1);
@@ -111,8 +111,8 @@ class LikeServiceTest {
         // Given
         Long userId = testUser.getId();
         Pageable pageable = PageRequest.of(0, 5);
-        when(likeCustomRepository.findLikedCommentsByUserOrderByCreatedAtDesc(userId, pageable))
-                .thenReturn(List.of(new CommentResponseDto()));
+        given(likeCustomRepository.findLikedCommentsByUserOrderByCreatedAtDesc(userId, pageable))
+                .willReturn(List.of(new CommentResponseDto()));
 
         // When
         List<CommentResponseDto> result = likeService.getLikedCommentByUser(userId, 1);
