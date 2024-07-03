@@ -12,6 +12,7 @@ import com.sparta.deventer.enums.NotFoundEntity;
 import com.sparta.deventer.exception.EntityNotFoundException;
 import com.sparta.deventer.exception.MismatchStatusException;
 import com.sparta.deventer.repository.CommentRepository;
+import com.sparta.deventer.repository.LikeCustomRepository;
 import com.sparta.deventer.repository.LikeRepository;
 import com.sparta.deventer.repository.PostRepository;
 import java.util.List;
@@ -28,13 +29,15 @@ public class LikeService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final LikeRepository likeRepository;
+    private final LikeCustomRepository likeCustomRepository;
 
     @Transactional
-    public String likeComparison(String contentType, Long contentId, User user) {
+    public String likeToggle(String contentType, Long contentId, User user) {
 
         ContentEnumType type = ContentEnumType.getByType(contentType);
 
-        Like existingLike = likeRepository.findLikeByContentAndUser(contentId, type, user.getId());
+        Like existingLike = likeCustomRepository.findLikeByContentAndUser(contentId, type,
+                user.getId());
 
         if (existingLike == null) {
             Object content = validateAndGetContent(contentType, contentId, user);
@@ -66,17 +69,13 @@ public class LikeService {
     @Transactional(readOnly = true)
     public List<PostResponseDto> getLikedPostsByUser(Long userId, int page) {
         Pageable pageable = PageRequest.of(page - 1, 5);
-        return likeRepository.findLikedPostsByUserOrderByCreatedAtDesc(userId, pageable).stream()
-                .map(PostResponseDto::new)
-                .toList();
+        return likeCustomRepository.findLikedPostsByUserOrderByCreatedAtDesc(userId, pageable);
     }
 
     @Transactional(readOnly = true)
     public List<CommentResponseDto> getLikedCommentByUser(Long userId, int page) {
         Pageable pageable = PageRequest.of(page - 1, 5);
-        return likeRepository.findLikedCommentsByUserOrderByCreatedAtDesc(userId, pageable).stream()
-                .map(CommentResponseDto::new)
-                .toList();
+        return likeCustomRepository.findLikedCommentsByUserOrderByCreatedAtDesc(userId, pageable);
     }
 
     private Object validateAndGetContent(String contentType, Long contentId, User user) {
@@ -84,7 +83,7 @@ public class LikeService {
             Post post = postRepository.findById(contentId)
                     .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.POST_NOT_FOUND));
 
-            if (user.checkUserId(post.getUser().getId())) {
+            if (user.isSameUserId(post.getUser().getId())) {
                 throw new MismatchStatusException(MismatchStatusEntity.SELF_USER);
             }
 
@@ -94,7 +93,7 @@ public class LikeService {
                     .orElseThrow(
                             () -> new EntityNotFoundException(NotFoundEntity.COMMENT_NOT_FOUND));
 
-            if (user.checkUserId(comment.getUser().getId())) {
+            if (user.isSameUserId(comment.getUser().getId())) {
                 throw new MismatchStatusException(MismatchStatusEntity.SELF_USER);
             }
 

@@ -36,7 +36,7 @@ public class ScrapService {
     }
 
     public List<ScrapResponseDto> getUserScraps(Long userId, User user) {
-        if (user.checkUserId(userId)) {
+        if (user.isSameUserId(userId)) {
             throw new IllegalArgumentException("자신의 게시글은 스크랩할 수 없습니다.");
         }
         List<Scrap> scraps = scrapRepository.findAllByUser(user);

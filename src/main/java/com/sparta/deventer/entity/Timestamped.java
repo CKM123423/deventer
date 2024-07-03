@@ -24,5 +24,5 @@ public abstract class Timestamped {
     @LastModifiedDate
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private LocalDateTime updateAt;
+    private LocalDateTime updatedAt;
 }

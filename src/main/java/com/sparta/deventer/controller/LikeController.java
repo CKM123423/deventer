@@ -26,7 +26,7 @@ public class LikeController {
     @PostMapping("/likes")
     public ResponseEntity<String> isLike(@RequestBody @Valid LikeRequestDto requestDto,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        String message = likeService.likeComparison(requestDto.getContentType(),
+        String message = likeService.likeToggle(requestDto.getContentType(),
                 requestDto.getContentId(), userDetails.getUser());
         return ResponseEntity.ok().body(message);
     }

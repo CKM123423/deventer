@@ -112,7 +112,7 @@ public class User extends Timestamped {
         }
     }
 
-    public boolean checkUserId(Long id) {
+    public boolean isSameUserId(Long id) {
         return Objects.equals(this.id, id);
     }
 }

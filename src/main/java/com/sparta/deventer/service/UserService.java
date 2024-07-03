@@ -2,6 +2,7 @@ package com.sparta.deventer.service;
 
 import com.sparta.deventer.dto.ChangePasswordRequestDto;
 import com.sparta.deventer.dto.CommentResponseDto;
+import com.sparta.deventer.dto.LikedContentCountsDto;
 import com.sparta.deventer.dto.PostResponseDto;
 import com.sparta.deventer.dto.ProfileResponseDto;
 import com.sparta.deventer.dto.UpdateProfileRequestDto;
@@ -11,7 +12,7 @@ import com.sparta.deventer.enums.ContentEnumType;
 import com.sparta.deventer.exception.InvalidPasswordException;
 import com.sparta.deventer.exception.InvalidUserException;
 import com.sparta.deventer.repository.CommentRepository;
-import com.sparta.deventer.repository.LikeRepository;
+import com.sparta.deventer.repository.LikeCustomRepository;
 import com.sparta.deventer.repository.PasswordHistoryRepository;
 import com.sparta.deventer.repository.PostRepository;
 import com.sparta.deventer.repository.UserRepository;
@@ -31,16 +32,27 @@ public class UserService {
     private final CommentRepository commentRepository;
     private final PasswordHistoryRepository passwordHistoryRepository;
     private final PasswordEncoder passwordEncoder;
-    private final LikeRepository likeRepository;
+    private final LikeCustomRepository likeCustomRepository;
 
     public ProfileResponseDto getProfile(Long userId, User user) {
-        if (!user.checkUserId(userId)) {
+        if (!user.isSameUserId(userId)) {
             throw new InvalidUserException("본인만 사용가능한 기능입니다.");
         }
-        long postsLikedCount = likeRepository.countLikedContentByUserId(userId,
-                ContentEnumType.POST);
-        long commentsLikedCount = likeRepository.countLikedContentByUserId(userId,
-                ContentEnumType.COMMENT);
+
+        List<LikedContentCountsDto> likedCounts = likeCustomRepository.likedCountsGroupByContentType(
+                userId);
+
+        Long postsLikedCount = 0L;
+        Long commentsLikedCount = 0L;
+
+        for (LikedContentCountsDto dto : likedCounts) {
+            if (dto.getContentType() == ContentEnumType.POST) {
+                postsLikedCount = dto.getCount();
+            } else if (dto.getContentType() == ContentEnumType.COMMENT) {
+                commentsLikedCount = dto.getCount();
+            }
+        }
+
         return ProfileResponseDto.builder()
                 .user(user)
                 .postsLikedCount(postsLikedCount)
@@ -49,14 +61,14 @@ public class UserService {
     }
 
     public Page<PostResponseDto> getAllPosts(Long userId, User user, Pageable pageable) {
-        if (!user.checkUserId(userId)) {
+        if (!user.isSameUserId(userId)) {
             throw new InvalidUserException("본인만 사용가능한 기능입니다.");
         }
         return postRepository.findByUserId(userId, pageable).map(PostResponseDto::new);
     }
 
     public Page<CommentResponseDto> getAllComments(Long userId, User user, Pageable pageable) {
-        if (!user.checkUserId(userId)) {
+        if (!user.isSameUserId(userId)) {
             throw new InvalidUserException("본인만 사용가능한 기능입니다.");
         }
         return commentRepository.findByUserId(userId, pageable).map(CommentResponseDto::new);
@@ -65,7 +77,7 @@ public class UserService {
     public ProfileResponseDto updateProfile(Long userId,
             UpdateProfileRequestDto updateProfileRequestDto, User user) {
 
-        if (!user.checkUserId(userId)) {
+        if (!user.isSameUserId(userId)) {
             throw new InvalidUserException("본인만 사용가능한 기능입니다.");
         }
 
@@ -81,7 +93,7 @@ public class UserService {
     public void changePassword(Long userId, ChangePasswordRequestDto changePasswordRequestDto,
             User user) {
 
-        if (!user.checkUserId(userId)) {
+        if (!user.isSameUserId(userId)) {
             throw new InvalidUserException("본인만 사용가능한 기능입니다.");
         }
 
