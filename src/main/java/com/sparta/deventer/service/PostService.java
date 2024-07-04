@@ -14,6 +14,7 @@ import com.sparta.deventer.enums.UserStatus;
 import com.sparta.deventer.exception.EntityNotFoundException;
 import com.sparta.deventer.repository.CategoryRepository;
 import com.sparta.deventer.repository.CommentRepository;
+import com.sparta.deventer.repository.PostCustomRepository;
 import com.sparta.deventer.repository.PostRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,12 +33,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final CommentRepository commentRepository;
-
-    private void UserNotBlocked(User user) {
-        if (user.getStatus() == UserStatus.BLOCKED) {
-            throw new EntityNotFoundException(NotFoundEntity.USER_NOT_FOUND);
-        }
-    }
+    private final PostCustomRepository postCustomRepository;
 
     public PostWithCommentsResponseDto getPostDetail(Long postId) {
         List<Comment> commentList = commentRepository.findAllByPostId(postId);
@@ -131,5 +128,18 @@ public class PostService {
         }
 
         postRepository.delete(post);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostResponseDto> getPostsByFollowingUser(int page, User user) {
+        Pageable pageable = PageRequest.of(page - 1, 5);
+        return postCustomRepository.findPostsByFollowingUsersOrderByCreatedAtDesc(user.getId(),
+                pageable);
+    }
+    
+    private void UserNotBlocked(User user) {
+        if (user.getStatus() == UserStatus.BLOCKED) {
+            throw new EntityNotFoundException(NotFoundEntity.USER_NOT_FOUND);
+        }
     }
 }

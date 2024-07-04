@@ -3,6 +3,7 @@ package com.sparta.deventer.dto;
 import com.sparta.deventer.entity.Post;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,6 +21,7 @@ public class PostResponseDto {
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
 
+    @Builder
     public PostResponseDto(Post post) {
         this.postId = post.getId();
         this.nickname = post.getUser().getNickname();

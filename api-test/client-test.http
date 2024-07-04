@@ -334,3 +334,7 @@ Content-Type: application/json
 {
   "followingUserNickname": "{{nickname2}}"
 }
+
+### 팔로우한 유저들의 게시물 조회
+GET http://localhost:8080/posts/follows?page=1
+Authorization: {{Authorization}}

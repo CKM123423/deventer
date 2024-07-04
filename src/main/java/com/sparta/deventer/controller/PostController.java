@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class PostController {
 
-    private static final int PAGE_SIZE = 5;
     private final PostService postService;
 
     @GetMapping("/{postId}")
@@ -86,5 +85,13 @@ public class PostController {
 
         postService.deletePost(postId, userDetails.getUser());
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/follows")
+    public ResponseEntity<List<PostResponseDto>> getPostsByFollowingUser(
+            @RequestParam(defaultValue = "0") int page,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok()
+                .body(postService.getPostsByFollowingUser(page, userDetails.getUser()));
     }
 }
