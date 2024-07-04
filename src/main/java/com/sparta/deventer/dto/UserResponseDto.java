@@ -3,9 +3,11 @@ package com.sparta.deventer.dto;
 import com.sparta.deventer.entity.User;
 import com.sparta.deventer.enums.UserRole;
 import com.sparta.deventer.enums.UserStatus;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class UserResponseDto {
 
     private final Long userId;

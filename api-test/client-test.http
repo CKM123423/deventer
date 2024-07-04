@@ -343,3 +343,7 @@ Authorization: {{Authorization}}
 ### 팔로우한 유저 개시물 조회(유저이름정렬)
 GET http://localhost:8080/posts/follows?page=1&sortBy=witer
 Authorization: {{Authorization}}
+
+
+### 팔로우 탑10 유저 정보
+GET http://localhost:8080/follows/top
