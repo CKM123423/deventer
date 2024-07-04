@@ -314,3 +314,23 @@ Authorization:{{Authorization}}
 ### 스크랩 내용 확인
 GET http://localhost:8080/scraps/users/{{userId}}
 Authorization: {{Authorization}}
+
+
+### 팔로우 등록
+POST http://localhost:8080/follows
+Authorization: {{Authorization}}
+Content-Type: application/json
+
+{
+  "followingUserNickname": "{{nickname2}}"
+}
+
+
+### 팔로우 취소
+DELETE http://localhost:8080/follows
+Authorization: {{Authorization}}
+Content-Type: application/json
+
+{
+  "followingUserNickname": "{{nickname2}}"
+}

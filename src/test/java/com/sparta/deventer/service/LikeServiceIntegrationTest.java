@@ -73,21 +73,6 @@ class LikeServiceIntegrationTest {
     }
 
     @Test
-    @Order(3)
-    @DisplayName("Like Success test - Liked")
-    void likeToggle_UnLiked_Test() {
-        //Given
-        String contentType = "post";
-        Long contentId = 1L;
-
-        // When
-        String result = likeService.likeToggle(contentType, contentId, testUser);
-
-        // Then
-        assertThat(result).isEqualTo("좋아요가 취소 되었습니다.");
-    }
-
-    @Test
     @Order(2)
     @DisplayName("Get Liked Posts By User Test - Success")
     void getLikedPostsByUser_Success_Test() {
@@ -101,6 +86,21 @@ class LikeServiceIntegrationTest {
         assertThat(likedPosts).isNotEmpty();
         assertThat(likedPosts).hasSize(1);
         assertThat(likedPosts.get(0).getPostId()).isEqualTo(contentId);
+    }
+
+    @Test
+    @Order(3)
+    @DisplayName("Like Success test - Liked")
+    void likeToggle_UnLiked_Test() {
+        //Given
+        String contentType = "post";
+        Long contentId = 1L;
+
+        // When
+        String result = likeService.likeToggle(contentType, contentId, testUser);
+
+        // Then
+        assertThat(result).isEqualTo("좋아요가 취소 되었습니다.");
     }
 
     @Test

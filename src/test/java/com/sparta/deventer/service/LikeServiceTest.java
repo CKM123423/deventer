@@ -17,6 +17,7 @@ import com.sparta.deventer.repository.LikeRepository;
 import com.sparta.deventer.repository.PostRepository;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,6 +48,7 @@ class LikeServiceTest {
     private User testUser;
 
     @Test
+    @DisplayName("Like Toggle Liked Test - Success")
     void likeToggle_Like_Test() {
         // Given
         String contentType = "post";
@@ -68,6 +70,7 @@ class LikeServiceTest {
     }
 
     @Test
+    @DisplayName("Like Toggle UnLiked Test - Success")
     void likeToggle_UnLike_Test() {
         // Given
         String contentType = "post";
@@ -90,6 +93,7 @@ class LikeServiceTest {
     }
 
     @Test
+    @DisplayName("Get Liked Posts By User Test - Success")
     void getLikedPostsByUser_Test() {
         // Given
         Long userId = testUser.getId();
@@ -107,6 +111,7 @@ class LikeServiceTest {
     }
 
     @Test
+    @DisplayName("Get Liked Comments By User Test - Success")
     void getLikedCommentByUser_Test() {
         // Given
         Long userId = testUser.getId();

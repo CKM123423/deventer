@@ -115,4 +115,8 @@ public class User extends Timestamped {
     public boolean isSameUserId(Long id) {
         return Objects.equals(this.id, id);
     }
+
+    public boolean isSameUserNickname(String nickname) {
+        return Objects.equals(this.nickname, nickname);
+    }
 }
