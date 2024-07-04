@@ -23,9 +23,8 @@ public class FollowService {
     private final UserRepository userRepository;
 
     public FollowResponseDto followUser(FollowRequestDto requestDto, User followerUser) {
-        if (followerUser.isSameUserNickname(requestDto.getFollowingUserNickname())) {
-            throw new MismatchStatusException(MismatchStatusEntity.SELF_USER);
-        }
+        
+        validateNotSelfFollow(followerUser, requestDto.getFollowingUserNickname());
 
         User followingUser = userRepository.findByNickname(requestDto.getFollowingUserNickname())
                 .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.USER_NOT_FOUND));
@@ -50,9 +49,8 @@ public class FollowService {
 
     @Transactional
     public String unFollowUser(FollowRequestDto requestDto, User followerUser) {
-        if (followerUser.isSameUserNickname(requestDto.getFollowingUserNickname())) {
-            throw new MismatchStatusException(MismatchStatusEntity.SELF_USER);
-        }
+
+        validateNotSelfFollow(followerUser, requestDto.getFollowingUserNickname());
 
         User followingUser = userRepository.findByNickname(requestDto.getFollowingUserNickname())
                 .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.USER_NOT_FOUND));
@@ -64,5 +62,11 @@ public class FollowService {
         followRepository.delete(follow);
 
         return FollowError.FOLLOW_CANCELLED.getMessage();
+    }
+
+    private void validateNotSelfFollow(User followerUser, String followingUserNickname) {
+        if (followerUser.isSameUserNickname(followingUserNickname)) {
+            throw new MismatchStatusException(MismatchStatusEntity.SELF_USER);
+        }
     }
 }
