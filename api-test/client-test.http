@@ -335,6 +335,11 @@ Content-Type: application/json
   "followingUserNickname": "{{nickname2}}"
 }
 
-### 팔로우한 유저들의 게시물 조회
+### 팔로우한 유저들의 게시물 조회(기본 정렬 : 생성일자)
 GET http://localhost:8080/posts/follows?page=1
+Authorization: {{Authorization}}
+
+
+### 팔로우한 유저 개시물 조회(유저이름정렬)
+GET http://localhost:8080/posts/follows?page=1&sortBy=witer
 Authorization: {{Authorization}}

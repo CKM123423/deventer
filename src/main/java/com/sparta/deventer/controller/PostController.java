@@ -90,8 +90,9 @@ public class PostController {
     @GetMapping("/follows")
     public ResponseEntity<List<PostResponseDto>> getPostsByFollowingUser(
             @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok()
-                .body(postService.getPostsByFollowingUser(page, userDetails.getUser()));
+                .body(postService.getPostsByFollowingUser(page, userDetails.getUser(), sortBy));
     }
 }

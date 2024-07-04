@@ -131,12 +131,12 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponseDto> getPostsByFollowingUser(int page, User user) {
+    public List<PostResponseDto> getPostsByFollowingUser(int page, User user, String sortBy) {
         Pageable pageable = PageRequest.of(page - 1, 5);
-        return postCustomRepository.findPostsByFollowingUsersOrderByCreatedAtDesc(user.getId(),
-                pageable);
+        return postCustomRepository.findPostsByFollowedUsersWithSorting(user.getId(), pageable,
+                sortBy);
     }
-    
+
     private void UserNotBlocked(User user) {
         if (user.getStatus() == UserStatus.BLOCKED) {
             throw new EntityNotFoundException(NotFoundEntity.USER_NOT_FOUND);
