@@ -5,14 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.sparta.deventer.dto.FollowRequestDto;
 import com.sparta.deventer.dto.FollowResponseDto;
+import com.sparta.deventer.dto.Top10ResponseDto;
+import com.sparta.deventer.entity.Follow;
 import com.sparta.deventer.entity.User;
 import com.sparta.deventer.enums.FollowError;
 import com.sparta.deventer.enums.MismatchStatusEntity;
 import com.sparta.deventer.enums.UserLoginType;
 import com.sparta.deventer.enums.UserRole;
 import com.sparta.deventer.exception.MismatchStatusException;
+import com.sparta.deventer.repository.FollowRepository;
 import com.sparta.deventer.repository.UserRepository;
 import com.sparta.deventer.test.TestDataGenerator;
+import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -39,6 +43,9 @@ class FollowServiceIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private FollowRepository followRepository;
 
     private User testUser1;
     private User testUser2;
@@ -146,5 +153,59 @@ class FollowServiceIntegrationTest {
 
         // Then
         assertThat(result).isEqualTo(FollowError.FOLLOW_CANCELLED.getMessage());
+    }
+
+    @Test
+    @Order(6)
+    @DisplayName("Get Top10 User By Follower Count - Success")
+    @Transactional
+    void getTop10UsersByFollowerCount_Success_Test() {
+        // Given
+        User testUser3 = new User(
+                "testUsername3",
+                "password",
+                "testNickname3",
+                UserRole.USER,
+                "user3@email.com",
+                UserLoginType.DEFAULT
+        );
+
+        User testUser4 = new User(
+                "testUsername4",
+                "password",
+                "testNickname4",
+                UserRole.USER,
+                "user4@email.com",
+                UserLoginType.DEFAULT
+        );
+
+        User testUser5 = new User(
+                "testUsername5",
+                "password",
+                "testNickname5",
+                UserRole.USER,
+                "user5@email.com",
+                UserLoginType.DEFAULT
+        );
+
+        userRepository.save(testUser3);
+        userRepository.save(testUser4);
+        userRepository.save(testUser5);
+        followRepository.save(new Follow(testUser1, testUser2));
+        followRepository.save(new Follow(testUser1, testUser3));
+        followRepository.save(new Follow(testUser1, testUser4));
+        followRepository.save(new Follow(testUser2, testUser3));
+        followRepository.save(new Follow(testUser2, testUser4));
+        followRepository.save(new Follow(testUser3, testUser4));
+        followRepository.save(new Follow(testUser4, testUser5));
+
+        // When
+        List<Top10ResponseDto> topUsers = followService.getTop10UsersByFollowerCount();
+
+        // Then
+        assertThat(topUsers).isNotNull();
+        assertThat(topUsers.size()).isLessThanOrEqualTo(4);
+        assertThat(topUsers.get(0).getFollowerCount()).isGreaterThanOrEqualTo(
+                topUsers.get(1).getFollowerCount());
     }
 }
