@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.sparta.deventer.dto.FollowRequestDto;
 import com.sparta.deventer.dto.PostResponseDto;
+import com.sparta.deventer.dto.PostSearchCond;
 import com.sparta.deventer.entity.User;
 import com.sparta.deventer.enums.UserLoginType;
 import com.sparta.deventer.enums.UserRole;
@@ -57,7 +58,6 @@ class PostServiceIntegrationTest {
         userRepository.save(testUser1);
     }
 
-
     @Test
     @Order(1)
     @DisplayName("Get Posts By Following User Sort By Created At - Success")
@@ -65,10 +65,12 @@ class PostServiceIntegrationTest {
         // Given
         int page = 1;
         String sortBy = "createdAt";
+        PostSearchCond postSearchCond = new PostSearchCond();
         followService.followUser(new FollowRequestDto("nickname"), testUser1);
 
         // When
-        List<PostResponseDto> posts = postService.getPostsByFollowingUser(page, testUser1, sortBy);
+        List<PostResponseDto> posts = postService.getPostsByFollowingUser(page, testUser1, sortBy,
+                postSearchCond);
 
         // Then
         assertThat(posts).isNotNull();
@@ -82,14 +84,35 @@ class PostServiceIntegrationTest {
 
     @Test
     @Order(2)
+    @DisplayName("Get Posts By Following User Sort By Created At And Filter Username - Success")
+    void getPostsByFollowingUser_Filter_Username_Success_Test() {
+        // Given
+        int page = 1;
+        String sortBy = "createdAt";
+        String username = "username";
+        PostSearchCond postSearchCond = new PostSearchCond(username, null, null);
+
+        // When
+        List<PostResponseDto> posts = postService.getPostsByFollowingUser(page, testUser1, sortBy,
+                postSearchCond);
+
+        // Then
+        assertThat(posts).isNotNull();
+        assertThat(posts.size()).isEqualTo(5);
+    }
+
+    @Test
+    @Order(3)
     @DisplayName("Get Posts By Following User Sort By Writer - Success")
     void getPostsByFollowingUser_SortByWriter_Success_Test() {
         // Given
         int page = 1;
         String sortBy = "writer";
+        PostSearchCond postSearchCond = new PostSearchCond();
 
         // When
-        List<PostResponseDto> posts = postService.getPostsByFollowingUser(page, testUser1, sortBy);
+        List<PostResponseDto> posts = postService.getPostsByFollowingUser(page, testUser1, sortBy,
+                postSearchCond);
 
         // Then
         assertThat(posts).isNotNull();

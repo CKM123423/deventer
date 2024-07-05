@@ -60,16 +60,19 @@ class UserServiceIntegrationTest {
         // Given
         Long postContentId = 1L;
         Long commentContentId = 1L;
+
         Like likePosts = Like.builder()
                 .user(testUser)
                 .contentType(ContentEnumType.POST)
                 .typeId(postContentId)
                 .build();
+
         Like likeComments = Like.builder()
                 .user(testUser)
                 .contentType(ContentEnumType.COMMENT)
                 .typeId(commentContentId)
                 .build();
+
         likeRepository.save(likePosts);
         likeRepository.save(likeComments);
 
