@@ -40,7 +40,6 @@ public class Follow {
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
-
     @Builder
     public Follow(User follower, User following) {
         this.follower = follower;

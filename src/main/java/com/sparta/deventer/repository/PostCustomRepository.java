@@ -1,8 +1,8 @@
 package com.sparta.deventer.repository;
 
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.deventer.dto.PostResponseDto;
 import com.sparta.deventer.dto.PostSearchCond;
@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Repository
@@ -26,11 +27,8 @@ public class PostCustomRepository {
             Pageable pageable, String sortBy, PostSearchCond postSearchCond) {
         QFollow follow = QFollow.follow;
         QPost post = QPost.post;
-        QUser user = QUser.user;
 
         OrderSpecifier<?> orderSpecifier = getOrderSpecifier(sortBy, post);
-
-        BooleanBuilder builder = buildSearchFilter(user, postSearchCond);
 
         return queryFactory
                 .select(Projections.constructor(
@@ -46,8 +44,12 @@ public class PostCustomRepository {
                 ))
                 .from(post)
                 .join(follow).on(post.user.id.eq(follow.following.id))
-                .where(follow.follower.id.eq(userId)
-                        .and(builder))
+                .where(
+                        follow.follower.id.eq(userId),
+                        usernameEq(postSearchCond.getUsername()),
+                        emailEq(postSearchCond.getEmail()),
+                        nicknameEq(postSearchCond.getNickname())
+                )
                 .orderBy(orderSpecifier)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -62,22 +64,15 @@ public class PostCustomRepository {
         }
     }
 
-    private BooleanBuilder buildSearchFilter(QUser user, PostSearchCond postSearchCond) {
+    private BooleanExpression usernameEq(String username) {
+        return StringUtils.hasText(username) ? QUser.user.username.eq(username) : null;
+    }
 
-        BooleanBuilder builder = new BooleanBuilder();
+    private BooleanExpression emailEq(String email) {
+        return StringUtils.hasText(email) ? QUser.user.email.eq(email) : null;
+    }
 
-        if (postSearchCond.getUsername() != null) {
-            builder.and(user.username.eq(postSearchCond.getUsername()));
-        }
-
-        if (postSearchCond.getEmail() != null) {
-            builder.and(user.email.eq(postSearchCond.getEmail()));
-        }
-
-        if (postSearchCond.getNickname() != null) {
-            builder.and(user.nickname.eq(postSearchCond.getNickname()));
-        }
-        
-        return builder;
+    private BooleanExpression nicknameEq(String nickname) {
+        return StringUtils.hasText(nickname) ? QUser.user.nickname.eq(nickname) : null;
     }
 }
