@@ -13,6 +13,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -23,14 +25,14 @@ public class PostCustomRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public List<PostResponseDto> findPostsByFollowedUsersWithSorting(Long userId,
+    public Slice<PostResponseDto> findPostsByFollowedUsersWithSorting(Long userId,
             Pageable pageable, String sortBy, PostSearchCond postSearchCond) {
         QFollow follow = QFollow.follow;
         QPost post = QPost.post;
 
         OrderSpecifier<?> orderSpecifier = getOrderSpecifier(sortBy, post);
 
-        return queryFactory
+        List<PostResponseDto> responseDtoList = queryFactory
                 .select(Projections.constructor(
                         PostResponseDto.class,
                         post.id,
@@ -54,6 +56,14 @@ public class PostCustomRepository {
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
+
+        boolean hasNext = false;
+        if (responseDtoList.size() > pageable.getPageSize()) {
+            responseDtoList.remove(pageable.getPageSize());
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(responseDtoList, pageable, hasNext);
     }
 
     private OrderSpecifier<?> getOrderSpecifier(String sortBy, QPost post) {

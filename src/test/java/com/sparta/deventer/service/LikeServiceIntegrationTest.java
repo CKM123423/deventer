@@ -9,7 +9,6 @@ import com.sparta.deventer.enums.UserLoginType;
 import com.sparta.deventer.enums.UserRole;
 import com.sparta.deventer.repository.UserRepository;
 import com.sparta.deventer.test.TestDataGenerator;
-import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Slice;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -80,12 +80,12 @@ class LikeServiceIntegrationTest {
         Long contentId = 1L;
 
         // When
-        List<PostResponseDto> likedPosts = likeService.getLikedPostsByUser(testUser.getId(), 1);
+        Slice<PostResponseDto> likedPosts = likeService.getLikedPostsByUser(testUser.getId(), 1);
 
         // Then
         assertThat(likedPosts).isNotEmpty();
         assertThat(likedPosts).hasSize(1);
-        assertThat(likedPosts.get(0).getPostId()).isEqualTo(contentId);
+        assertThat(likedPosts.getContent().get(0).getPostId()).isEqualTo(contentId);
     }
 
     @Test
@@ -113,12 +113,13 @@ class LikeServiceIntegrationTest {
         likeService.likeToggle(contentType, contentId, testUser);
 
         // When
-        List<CommentResponseDto> likedComments = likeService.getLikedCommentByUser(testUser.getId(),
+        Slice<CommentResponseDto> likedComments = likeService.getLikedCommentByUser(
+                testUser.getId(),
                 1);
 
         // Then
         assertThat(likedComments).isNotEmpty();
         assertThat(likedComments).hasSize(1);
-        assertThat(likedComments.get(0).getId()).isEqualTo(contentId);
+        assertThat(likedComments.getContent().get(0).getId()).isEqualTo(contentId);
     }
 }

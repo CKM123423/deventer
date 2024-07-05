@@ -25,6 +25,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 @ExtendWith(MockitoExtension.class)
 class LikeServiceTest {
@@ -98,11 +100,13 @@ class LikeServiceTest {
         // Given
         Long userId = testUser.getId();
         Pageable pageable = PageRequest.of(0, 5);
+        List<PostResponseDto> postList = List.of(new PostResponseDto());
+        Slice<PostResponseDto> postSlice = new SliceImpl<>(postList, pageable, false);
         given(likeCustomRepository.findLikedPostsByUserOrderByCreatedAtDesc(userId, pageable))
-                .willReturn(List.of(new PostResponseDto()));
+                .willReturn(postSlice);
 
         // When
-        List<PostResponseDto> result = likeService.getLikedPostsByUser(userId, 1);
+        Slice<PostResponseDto> result = likeService.getLikedPostsByUser(userId, 1);
 
         // Then
         assertThat(result).isNotEmpty();
@@ -116,11 +120,13 @@ class LikeServiceTest {
         // Given
         Long userId = testUser.getId();
         Pageable pageable = PageRequest.of(0, 5);
+        List<CommentResponseDto> postList = List.of(new CommentResponseDto());
+        Slice<CommentResponseDto> postSlice = new SliceImpl<>(postList, pageable, false);
         given(likeCustomRepository.findLikedCommentsByUserOrderByCreatedAtDesc(userId, pageable))
-                .willReturn(List.of(new CommentResponseDto()));
+                .willReturn(postSlice);
 
         // When
-        List<CommentResponseDto> result = likeService.getLikedCommentByUser(userId, 1);
+        Slice<CommentResponseDto> result = likeService.getLikedCommentByUser(userId, 1);
 
         // Then
         assertThat(result).isNotEmpty();

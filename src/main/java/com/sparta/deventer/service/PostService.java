@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -132,7 +133,7 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponseDto> getPostsByFollowingUser(int page, User user, String sortBy,
+    public Slice<PostResponseDto> getPostsByFollowingUser(int page, User user, String sortBy,
             PostSearchCond postSearchCond) {
         Pageable pageable = PageRequest.of(page - 1, 5);
         return postCustomRepository.findPostsByFollowedUsersWithSorting(user.getId(), pageable,

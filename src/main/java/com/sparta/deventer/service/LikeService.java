@@ -15,10 +15,10 @@ import com.sparta.deventer.repository.CommentRepository;
 import com.sparta.deventer.repository.LikeCustomRepository;
 import com.sparta.deventer.repository.LikeRepository;
 import com.sparta.deventer.repository.PostRepository;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,13 +67,13 @@ public class LikeService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponseDto> getLikedPostsByUser(Long userId, int page) {
+    public Slice<PostResponseDto> getLikedPostsByUser(Long userId, int page) {
         Pageable pageable = PageRequest.of(page - 1, 5);
         return likeCustomRepository.findLikedPostsByUserOrderByCreatedAtDesc(userId, pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<CommentResponseDto> getLikedCommentByUser(Long userId, int page) {
+    public Slice<CommentResponseDto> getLikedCommentByUser(Long userId, int page) {
         Pageable pageable = PageRequest.of(page - 1, 5);
         return likeCustomRepository.findLikedCommentsByUserOrderByCreatedAtDesc(userId, pageable);
     }

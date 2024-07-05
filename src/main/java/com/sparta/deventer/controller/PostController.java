@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -89,7 +90,7 @@ public class PostController {
     }
 
     @GetMapping("/follows")
-    public ResponseEntity<List<PostResponseDto>> getPostsByFollowingUser(
+    public ResponseEntity<Slice<PostResponseDto>> getPostsByFollowingUser(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
             @RequestBody PostSearchCond postSearchCond,
