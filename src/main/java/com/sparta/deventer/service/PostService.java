@@ -3,6 +3,7 @@ package com.sparta.deventer.service;
 import com.sparta.deventer.dto.CommentResponseDto;
 import com.sparta.deventer.dto.PostRequestDto;
 import com.sparta.deventer.dto.PostResponseDto;
+import com.sparta.deventer.dto.PostSearchCond;
 import com.sparta.deventer.dto.PostWithCommentsResponseDto;
 import com.sparta.deventer.dto.UpdatePostRequestDto;
 import com.sparta.deventer.entity.Category;
@@ -131,10 +132,11 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponseDto> getPostsByFollowingUser(int page, User user, String sortBy) {
+    public List<PostResponseDto> getPostsByFollowingUser(int page, User user, String sortBy,
+            PostSearchCond postSearchCond) {
         Pageable pageable = PageRequest.of(page - 1, 5);
         return postCustomRepository.findPostsByFollowedUsersWithSorting(user.getId(), pageable,
-                sortBy);
+                sortBy, postSearchCond);
     }
 
     private void UserNotBlocked(User user) {

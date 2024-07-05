@@ -2,6 +2,7 @@ package com.sparta.deventer.controller;
 
 import com.sparta.deventer.dto.PostRequestDto;
 import com.sparta.deventer.dto.PostResponseDto;
+import com.sparta.deventer.dto.PostSearchCond;
 import com.sparta.deventer.dto.PostWithCommentsResponseDto;
 import com.sparta.deventer.dto.UpdatePostRequestDto;
 import com.sparta.deventer.security.UserDetailsImpl;
@@ -90,9 +91,11 @@ public class PostController {
     @GetMapping("/follows")
     public ResponseEntity<List<PostResponseDto>> getPostsByFollowingUser(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
+            @RequestBody PostSearchCond postSearchCond,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok()
-                .body(postService.getPostsByFollowingUser(page, userDetails.getUser(), sortBy));
+                .body(postService.getPostsByFollowingUser(page, userDetails.getUser(), sortBy,
+                        postSearchCond));
     }
 }

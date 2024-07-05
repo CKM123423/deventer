@@ -1,14 +1,13 @@
 package com.sparta.deventer.dto;
 
+import com.querydsl.core.annotations.QueryProjection;
 import com.sparta.deventer.entity.Post;
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
 public class PostResponseDto {
 
@@ -31,5 +30,18 @@ public class PostResponseDto {
         this.likeCount = post.getLikeCount();
         this.createAt = post.getCreatedAt();
         this.updateAt = post.getUpdatedAt();
+    }
+
+    @QueryProjection
+    public PostResponseDto(Long postId, String nickname, String categoryTopic, String title,
+            String content, Long likeCount, LocalDateTime createAt, LocalDateTime updateAt) {
+        this.postId = postId;
+        this.nickname = nickname;
+        this.categoryTopic = categoryTopic;
+        this.title = title;
+        this.content = content;
+        this.likeCount = likeCount;
+        this.createAt = createAt;
+        this.updateAt = updateAt;
     }
 }
