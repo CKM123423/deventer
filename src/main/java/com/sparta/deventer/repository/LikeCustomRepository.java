@@ -14,6 +14,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 @Slf4j
@@ -33,12 +35,12 @@ public class LikeCustomRepository {
                 .fetchOne();
     }
 
-    public List<PostResponseDto> findLikedPostsByUserOrderByCreatedAtDesc(Long userId,
+    public Slice<PostResponseDto> findLikedPostsByUserOrderByCreatedAtDesc(Long userId,
             Pageable pageable) {
         QLike qLike = QLike.like;
         QPost qPost = QPost.post;
 
-        return queryFactory
+        List<PostResponseDto> responseDtoList = queryFactory
                 .select(Projections.constructor(
                         PostResponseDto.class,
                         qPost.id,
@@ -55,17 +57,25 @@ public class LikeCustomRepository {
                 .where(qLike.user.id.eq(userId)
                         .and(qLike.contentType.eq(ContentEnumType.POST)))
                 .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                .limit(pageable.getPageSize() + 1)
                 .orderBy(qPost.createdAt.desc())
                 .fetch();
+
+        boolean hasNext = false;
+        if (responseDtoList.size() > pageable.getPageSize()) {
+            responseDtoList.remove(pageable.getPageSize());
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(responseDtoList, pageable, hasNext);
     }
 
-    public List<CommentResponseDto> findLikedCommentsByUserOrderByCreatedAtDesc(Long userId,
+    public Slice<CommentResponseDto> findLikedCommentsByUserOrderByCreatedAtDesc(Long userId,
             Pageable pageable) {
         QLike qLike = QLike.like;
         QComment qComment = QComment.comment;
 
-        return queryFactory
+        List<CommentResponseDto> responseDtoList = queryFactory
                 .select(Projections.constructor(
                         CommentResponseDto.class,
                         qComment.content,
@@ -81,9 +91,17 @@ public class LikeCustomRepository {
                 .where(qLike.user.id.eq(userId)
                         .and(qLike.contentType.eq(ContentEnumType.COMMENT)))
                 .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                .limit(pageable.getPageSize() + 1)
                 .orderBy(qComment.createdAt.desc())
                 .fetch();
+
+        boolean hasNext = false;
+        if (responseDtoList.size() > pageable.getPageSize()) {
+            responseDtoList.remove(pageable.getPageSize());
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(responseDtoList, pageable, hasNext);
     }
 
     public List<LikedContentCountsDto> likedCountsGroupByContentType(Long userId) {

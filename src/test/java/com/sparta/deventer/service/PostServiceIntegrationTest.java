@@ -10,7 +10,6 @@ import com.sparta.deventer.enums.UserLoginType;
 import com.sparta.deventer.enums.UserRole;
 import com.sparta.deventer.repository.UserRepository;
 import com.sparta.deventer.test.TestDataGenerator;
-import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -20,6 +19,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Slice;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -69,17 +69,17 @@ class PostServiceIntegrationTest {
         followService.followUser(new FollowRequestDto("nickname"), testUser1);
 
         // When
-        List<PostResponseDto> posts = postService.getPostsByFollowingUser(page, testUser1, sortBy,
+        Slice<PostResponseDto> posts = postService.getPostsByFollowingUser(page, testUser1, sortBy,
                 postSearchCond);
 
         // Then
         assertThat(posts).isNotNull();
-        assertThat(posts.size()).isEqualTo(5);
-        assertThat(posts.get(0).getTitle()).isEqualTo("Title 10");
-        assertThat(posts.get(1).getTitle()).isEqualTo("Title 9");
-        assertThat(posts.get(2).getTitle()).isEqualTo("Title 8");
-        assertThat(posts.get(3).getTitle()).isEqualTo("Title 7");
-        assertThat(posts.get(4).getTitle()).isEqualTo("Title 6");
+        assertThat(posts.getContent().size()).isEqualTo(5);
+        assertThat(posts.getContent().get(0).getTitle()).isEqualTo("Title 10");
+        assertThat(posts.getContent().get(1).getTitle()).isEqualTo("Title 9");
+        assertThat(posts.getContent().get(2).getTitle()).isEqualTo("Title 8");
+        assertThat(posts.getContent().get(3).getTitle()).isEqualTo("Title 7");
+        assertThat(posts.getContent().get(4).getTitle()).isEqualTo("Title 6");
     }
 
     @Test
@@ -93,12 +93,12 @@ class PostServiceIntegrationTest {
         PostSearchCond postSearchCond = new PostSearchCond(username, null, null);
 
         // When
-        List<PostResponseDto> posts = postService.getPostsByFollowingUser(page, testUser1, sortBy,
+        Slice<PostResponseDto> posts = postService.getPostsByFollowingUser(page, testUser1, sortBy,
                 postSearchCond);
 
         // Then
         assertThat(posts).isNotNull();
-        assertThat(posts.size()).isEqualTo(5);
+        assertThat(posts.getContent().size()).isEqualTo(5);
     }
 
     @Test
@@ -111,12 +111,12 @@ class PostServiceIntegrationTest {
         PostSearchCond postSearchCond = new PostSearchCond();
 
         // When
-        List<PostResponseDto> posts = postService.getPostsByFollowingUser(page, testUser1, sortBy,
+        Slice<PostResponseDto> posts = postService.getPostsByFollowingUser(page, testUser1, sortBy,
                 postSearchCond);
 
         // Then
         assertThat(posts).isNotNull();
-        assertThat(posts.size()).isEqualTo(5);
-        assertThat(posts.get(0).getNickname()).isEqualTo("nickname");
+        assertThat(posts.getContent().size()).isEqualTo(5);
+        assertThat(posts.getContent().get(0).getNickname()).isEqualTo("nickname");
     }
 }

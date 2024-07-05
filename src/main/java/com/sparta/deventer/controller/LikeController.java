@@ -6,8 +6,8 @@ import com.sparta.deventer.dto.PostResponseDto;
 import com.sparta.deventer.security.UserDetailsImpl;
 import com.sparta.deventer.service.LikeService;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,16 +32,17 @@ public class LikeController {
     }
 
     @GetMapping("/users/{userId}/likes/posts")
-    public ResponseEntity<List<PostResponseDto>> getLikedPostsByUser(@PathVariable Long userId,
+    public ResponseEntity<Slice<PostResponseDto>> getLikedPostsByUser(@PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page) {
-        List<PostResponseDto> response = likeService.getLikedPostsByUser(userId, page);
+        Slice<PostResponseDto> response = likeService.getLikedPostsByUser(userId, page);
         return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/users/{userId}/likes/comments")
-    public ResponseEntity<List<CommentResponseDto>> getLikedCommentByUser(@PathVariable Long userId,
+    public ResponseEntity<Slice<CommentResponseDto>> getLikedCommentByUser(
+            @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page) {
-        List<CommentResponseDto> response = likeService.getLikedCommentByUser(userId, page);
+        Slice<CommentResponseDto> response = likeService.getLikedCommentByUser(userId, page);
         return ResponseEntity.ok().body(response);
     }
 }
