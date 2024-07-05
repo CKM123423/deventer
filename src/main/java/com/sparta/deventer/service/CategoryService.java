@@ -47,7 +47,7 @@ public class CategoryService {
                         category.getId(),
                         category.getTopic(),
                         category.getCreatedAt(),
-                        category.getUpdateAt()))
+                        category.getUpdatedAt()))
                 .toList();
     }
 
@@ -113,7 +113,7 @@ public class CategoryService {
                 category.getId(),
                 category.getTopic(),
                 category.getCreatedAt(),
-                category.getUpdateAt()
+                category.getUpdatedAt()
         );
     }
 }

@@ -5,15 +5,21 @@ import com.sparta.deventer.enums.UserRole;
 import com.sparta.deventer.enums.UserStatus;
 import com.sparta.deventer.exception.AlreadyWithdrawnException;
 import com.sparta.deventer.exception.InvalidPasswordException;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,7 +40,6 @@ public class User extends Timestamped {
     private String username;
 
     @Column(nullable = false)
-    @Setter
     private String password;
 
     @Column(nullable = false, unique = true)
@@ -50,7 +55,6 @@ public class User extends Timestamped {
     private String refreshToken;
 
     @Column(nullable = false, unique = true)
-    @Setter
     private String email;
 
     @Column(nullable = false)
@@ -64,6 +68,9 @@ public class User extends Timestamped {
 
     private LocalDateTime deletedAt;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Like> likes = new ArrayList<>();
+
     public User(String username, String password, String nickname, UserRole role, String email,
             UserLoginType loginType) {
         this.username = username;
@@ -76,16 +83,13 @@ public class User extends Timestamped {
         this.refreshToken = null;
     }
 
-    public void validatePassword(PasswordEncoder passwordEncoder, String password) {
-        if (!passwordEncoder.matches(password, this.password)) {
-            throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
-        }
+    public void updateUserProfile(String nickname, String email) {
+        this.nickname = nickname == null ? this.nickname : nickname;
+        this.email = email == null ? this.email : email;
     }
 
-    public void validateId(Long id) {
-        if (!id.equals(this.getId())) {
-            throw new IllegalArgumentException("자신의 정보만 수정할 수 있습니다.");
-        }
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
     }
 
     public void saveRefreshToken(String refreshToken) {
@@ -101,5 +105,19 @@ public class User extends Timestamped {
         if (this.status == UserStatus.DELETED) {
             throw new AlreadyWithdrawnException("이미 탈퇴한 사용자입니다.");
         }
+    }
+
+    public void validatePassword(PasswordEncoder passwordEncoder, String password) {
+        if (!passwordEncoder.matches(password, this.password)) {
+            throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
+        }
+    }
+
+    public boolean isSameUserId(Long id) {
+        return Objects.equals(this.id, id);
+    }
+
+    public boolean isSameUserNickname(String nickname) {
+        return Objects.equals(this.nickname, nickname);
     }
 }

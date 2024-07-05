@@ -22,7 +22,7 @@ public class ScrapService {
 
     public boolean toggleScrap(Long postsId, User user) {
         Post post = postRepository.findById(postsId)
-            .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.POST_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.POST_NOT_FOUND));
 
         Optional<Scrap> optionalScrap = scrapRepository.findByUserAndPost(user, post);
         if (optionalScrap.isEmpty()) {
@@ -36,7 +36,9 @@ public class ScrapService {
     }
 
     public List<ScrapResponseDto> getUserScraps(Long userId, User user) {
-        user.validateId(userId);
+        if (user.isSameUserId(userId)) {
+            throw new IllegalArgumentException("자신의 게시글은 스크랩할 수 없습니다.");
+        }
         List<Scrap> scraps = scrapRepository.findAllByUser(user);
         return scraps.stream().map(scrap -> new ScrapResponseDto(scrap.getPost())).toList();
     }

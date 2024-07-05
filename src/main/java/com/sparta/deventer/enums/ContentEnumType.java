@@ -1,4 +1,4 @@
-package com.sparta.deventer.entity;
+package com.sparta.deventer.enums;
 
 import java.util.Objects;
 import lombok.Getter;

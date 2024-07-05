@@ -1,5 +1,7 @@
 package com.sparta.deventer.entity;
 
+import com.sparta.deventer.enums.ContentEnumType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -21,21 +23,23 @@ public class Like extends Timestamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    
-    private long contentId;
 
+    @Column(nullable = false)
+    private Long contentId;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ContentEnumType contentType;
 
     @Builder
-    public Like(User user, long typeId, String type) {
+    public Like(User user, Long typeId, ContentEnumType contentType) {
         this.user = user;
-        this.contentType = ContentEnumType.getByType(type);
+        this.contentType = contentType;
         this.contentId = typeId;
     }
 }

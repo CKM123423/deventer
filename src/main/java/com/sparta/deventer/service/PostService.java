@@ -3,6 +3,7 @@ package com.sparta.deventer.service;
 import com.sparta.deventer.dto.CommentResponseDto;
 import com.sparta.deventer.dto.PostRequestDto;
 import com.sparta.deventer.dto.PostResponseDto;
+import com.sparta.deventer.dto.PostSearchCond;
 import com.sparta.deventer.dto.PostWithCommentsResponseDto;
 import com.sparta.deventer.dto.UpdatePostRequestDto;
 import com.sparta.deventer.entity.Category;
@@ -14,6 +15,7 @@ import com.sparta.deventer.enums.UserStatus;
 import com.sparta.deventer.exception.EntityNotFoundException;
 import com.sparta.deventer.repository.CategoryRepository;
 import com.sparta.deventer.repository.CommentRepository;
+import com.sparta.deventer.repository.PostCustomRepository;
 import com.sparta.deventer.repository.PostRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,14 +34,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final CommentRepository commentRepository;
-
-  private void UserNotBlocked(User user) {
-    if (user.getStatus() == UserStatus.BLOCKED) {
-      throw new EntityNotFoundException(NotFoundEntity.USER_NOT_FOUND);
-    }
-  }
-
-
+    private final PostCustomRepository postCustomRepository;
 
     public PostWithCommentsResponseDto getPostDetail(Long postId) {
         List<Comment> commentList = commentRepository.findAllByPostId(postId);
@@ -60,7 +56,7 @@ public class PostService {
 
     // 게시물 생성
     public PostResponseDto createPost(PostRequestDto postRequestDto, User user) {
-      UserNotBlocked(user);
+        UserNotBlocked(user);
         Category category = categoryRepository.findByTopic(postRequestDto.getCategoryTopic())
                 .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.CATEGORY_NOT_FOUND));
 
@@ -77,6 +73,7 @@ public class PostService {
                 pageable.getPageSize(),
                 Sort.by("createdAt").descending()
         );
+
         Page<PostResponseDto> page = postRepository.findAll(sortedByCreatedAtDesc)
                 .map(PostResponseDto::new);
 
@@ -93,6 +90,7 @@ public class PostService {
                 pageable.getPageSize(),
                 Sort.by("createdAt").descending()
         );
+
         Page<PostResponseDto> page = postRepository.findAllByCategory(category,
                         sortedByCreatedAtDesc)
                 .map(PostResponseDto::new);
@@ -103,7 +101,7 @@ public class PostService {
     // 게시글 수정
     public PostResponseDto updatePost(Long postId, UpdatePostRequestDto updatePostRequestsDto,
             User user) {
-      UserNotBlocked(user);
+        UserNotBlocked(user);
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.POST_NOT_FOUND));
@@ -122,7 +120,7 @@ public class PostService {
 
     //게시글 삭제
     public void deletePost(Long postId, User user) {
-      UserNotBlocked(user);
+        UserNotBlocked(user);
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.POST_NOT_FOUND));
 
@@ -131,5 +129,19 @@ public class PostService {
         }
 
         postRepository.delete(post);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostResponseDto> getPostsByFollowingUser(int page, User user, String sortBy,
+            PostSearchCond postSearchCond) {
+        Pageable pageable = PageRequest.of(page - 1, 5);
+        return postCustomRepository.findPostsByFollowedUsersWithSorting(user.getId(), pageable,
+                sortBy, postSearchCond);
+    }
+
+    private void UserNotBlocked(User user) {
+        if (user.getStatus() == UserStatus.BLOCKED) {
+            throw new EntityNotFoundException(NotFoundEntity.USER_NOT_FOUND);
+        }
     }
 }

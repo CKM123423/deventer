@@ -2,13 +2,17 @@ package com.sparta.deventer.service;
 
 import com.sparta.deventer.dto.ChangePasswordRequestDto;
 import com.sparta.deventer.dto.CommentResponseDto;
+import com.sparta.deventer.dto.LikedContentCountsDto;
 import com.sparta.deventer.dto.PostResponseDto;
 import com.sparta.deventer.dto.ProfileResponseDto;
 import com.sparta.deventer.dto.UpdateProfileRequestDto;
 import com.sparta.deventer.entity.PasswordHistory;
 import com.sparta.deventer.entity.User;
+import com.sparta.deventer.enums.ContentEnumType;
 import com.sparta.deventer.exception.InvalidPasswordException;
+import com.sparta.deventer.exception.InvalidUserException;
 import com.sparta.deventer.repository.CommentRepository;
+import com.sparta.deventer.repository.LikeCustomRepository;
 import com.sparta.deventer.repository.PasswordHistoryRepository;
 import com.sparta.deventer.repository.PostRepository;
 import com.sparta.deventer.repository.UserRepository;
@@ -28,42 +32,75 @@ public class UserService {
     private final CommentRepository commentRepository;
     private final PasswordHistoryRepository passwordHistoryRepository;
     private final PasswordEncoder passwordEncoder;
+    private final LikeCustomRepository likeCustomRepository;
 
     public ProfileResponseDto getProfile(Long userId, User user) {
-        user.validateId(userId);
-        return new ProfileResponseDto(user);
+        if (!user.isSameUserId(userId)) {
+            throw new InvalidUserException("본인만 사용가능한 기능입니다.");
+        }
+
+        List<LikedContentCountsDto> likedCounts = likeCustomRepository.likedCountsGroupByContentType(
+                userId);
+
+        Long postsLikedCount = 0L;
+        Long commentsLikedCount = 0L;
+
+        for (LikedContentCountsDto dto : likedCounts) {
+            if (dto.getContentType() == ContentEnumType.POST) {
+                postsLikedCount = dto.getCount();
+            } else if (dto.getContentType() == ContentEnumType.COMMENT) {
+                commentsLikedCount = dto.getCount();
+            }
+        }
+
+        return ProfileResponseDto.builder()
+                .user(user)
+                .postsLikedCount(postsLikedCount)
+                .commentsLikedCount(commentsLikedCount)
+                .build();
     }
 
     public Page<PostResponseDto> getAllPosts(Long userId, User user, Pageable pageable) {
-        user.validateId(userId);
+        if (!user.isSameUserId(userId)) {
+            throw new InvalidUserException("본인만 사용가능한 기능입니다.");
+        }
         return postRepository.findByUserId(userId, pageable).map(PostResponseDto::new);
     }
 
     public Page<CommentResponseDto> getAllComments(Long userId, User user, Pageable pageable) {
-        user.validateId(userId);
+        if (!user.isSameUserId(userId)) {
+            throw new InvalidUserException("본인만 사용가능한 기능입니다.");
+        }
         return commentRepository.findByUserId(userId, pageable).map(CommentResponseDto::new);
     }
 
     public ProfileResponseDto updateProfile(Long userId,
-        UpdateProfileRequestDto updateProfileRequestDto, User user) {
+            UpdateProfileRequestDto updateProfileRequestDto, User user) {
 
-        user.validateId(userId);
+        if (!user.isSameUserId(userId)) {
+            throw new InvalidUserException("본인만 사용가능한 기능입니다.");
+        }
 
-        user.setNickname(updateProfileRequestDto.getNickname());
-        user.setEmail(updateProfileRequestDto.getEmail());
+        user.updateUserProfile(updateProfileRequestDto.getNickname(),
+                updateProfileRequestDto.getEmail());
+
         userRepository.save(user);
-        return new ProfileResponseDto(user);
+        return ProfileResponseDto.builder()
+                .user(user)
+                .build();
     }
 
     public void changePassword(Long userId, ChangePasswordRequestDto changePasswordRequestDto,
-        User user) {
+            User user) {
 
-        user.validateId(userId);
+        if (!user.isSameUserId(userId)) {
+            throw new InvalidUserException("본인만 사용가능한 기능입니다.");
+        }
 
         String currentPassword = changePasswordRequestDto.getCurrentPassword();
         String newPassword = changePasswordRequestDto.getNewPassword();
         List<PasswordHistory> passwordHistoryList =
-            passwordHistoryRepository.findByUserOrderByCreatedAtAsc(user);
+                passwordHistoryRepository.findByUserOrderByCreatedAtAsc(user);
 
         user.validatePassword(passwordEncoder, currentPassword);
         validateNewPassword(user, newPassword);
@@ -76,7 +113,7 @@ public class UserService {
             passwordHistoryRepository.delete(passwordHistoryList.get(0));
         }
 
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.updatePassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
 
@@ -87,7 +124,7 @@ public class UserService {
     }
 
     public void validatePasswordHistory(String newPassword,
-        List<PasswordHistory> passwordHistoryList) {
+            List<PasswordHistory> passwordHistoryList) {
 
         for (PasswordHistory passwordHistory : passwordHistoryList) {
             if (passwordEncoder.matches(newPassword, passwordHistory.getPassword())) {

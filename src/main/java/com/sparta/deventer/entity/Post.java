@@ -44,15 +44,26 @@ public class Post extends Timestamped {
     @Column(nullable = false)
     private boolean notice = false;
 
+    private Long likeCount;
+
     public Post(String title, String content, User user, Category category) {
         this.title = title;
         this.content = content;
         this.user = user;
         this.category = category;
+        this.likeCount = 0L;
     }
 
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public void likeCountUp() {
+        this.likeCount++;
+    }
+
+    public void likeCountDown() {
+        this.likeCount--;
     }
 }

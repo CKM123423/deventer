@@ -35,8 +35,8 @@ public class CommentService {
         Comment comment = new Comment(post, user, requestDto.getContent());
 
         commentRepository.save(comment);
-        return new CommentResponseDto(comment);
 
+        return new CommentResponseDto(comment);
     }
 
     @Transactional
