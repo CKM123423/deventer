@@ -54,7 +54,7 @@ public class PostCustomRepository {
                 )
                 .orderBy(orderSpecifier)
                 .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                .limit(pageable.getPageSize() + 1)
                 .fetch();
 
         boolean hasNext = false;

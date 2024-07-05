@@ -25,6 +25,7 @@ public class ScrapService {
                 .orElseThrow(() -> new EntityNotFoundException(NotFoundEntity.POST_NOT_FOUND));
 
         Optional<Scrap> optionalScrap = scrapRepository.findByUserAndPost(user, post);
+
         if (optionalScrap.isEmpty()) {
             Scrap scrap = new Scrap(user, post);
             scrapRepository.save(scrap);
@@ -39,6 +40,7 @@ public class ScrapService {
         if (user.isSameUserId(userId)) {
             throw new IllegalArgumentException("자신의 게시글은 스크랩할 수 없습니다.");
         }
+
         List<Scrap> scraps = scrapRepository.findAllByUser(user);
         return scraps.stream().map(scrap -> new ScrapResponseDto(scrap.getPost())).toList();
     }
